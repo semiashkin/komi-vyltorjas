@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: 'komi.vyltrorjas'
+
+api:
+  neurotolge:
+    host: https://api.tartunlp.ai/translation/
+
