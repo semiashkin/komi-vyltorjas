@@ -1,4 +1,4 @@
-package com.semiashkin.komi.vyltrorjas.dto;
+package com.semiashkin.komi.vyltrorjas.neurotolge.dto;
 
 import lombok.Builder;
 import lombok.Getter;

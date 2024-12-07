@@ -1,4 +1,4 @@
-package com.semiashkin.komi.vyltrorjas.util;
+package com.semiashkin.komi.vyltrorjas.common.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;

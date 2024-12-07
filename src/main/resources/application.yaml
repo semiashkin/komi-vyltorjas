@@ -1,8 +1,13 @@
 spring:
   application:
     name: 'komi.vyltrorjas'
+    domain: 'general'
 
 api:
   neurotolge:
     host: https://api.tartunlp.ai/translation/
+
+rss:
+  euronews:
+    uri: https://www.euronews.com/rss
 

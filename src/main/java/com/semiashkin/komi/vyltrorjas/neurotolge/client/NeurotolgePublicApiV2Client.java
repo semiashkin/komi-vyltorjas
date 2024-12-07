@@ -1,7 +1,7 @@
-package com.semiashkin.komi.vyltrorjas.client;
+package com.semiashkin.komi.vyltrorjas.neurotolge.client;
 
-import com.semiashkin.komi.vyltrorjas.dto.NeurotolgeTranslateRequest;
-import com.semiashkin.komi.vyltrorjas.dto.NeurotolgeTranslateResponse;
+import com.semiashkin.komi.vyltrorjas.neurotolge.dto.NeurotolgeTranslateRequest;
+import com.semiashkin.komi.vyltrorjas.neurotolge.dto.NeurotolgeTranslateResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
