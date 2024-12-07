@@ -11,3 +11,8 @@ rss:
   euronews:
     uri: https://www.euronews.com/rss
 
+telegram:
+  bot:
+    token: ${TELEGRAM_BOT_TOKEN}
+
+TELERGAM_BOT_TOKEN: 'NOT_A_TOKEN'
