@@ -1,4 +1,4 @@
-package com.semiashkin.komi.vyltrorjas.dto;
+package com.semiashkin.komi.vyltrorjas.common.dto;
 
 import lombok.Getter;
 
