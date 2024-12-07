@@ -13,6 +13,4 @@ rss:
 
 telegram:
   bot:
-    token: ${TELEGRAM_BOT_TOKEN}
-
-TELERGAM_BOT_TOKEN: 'NOT_A_TOKEN'
+    token: 'NOT_A_TOKEN'

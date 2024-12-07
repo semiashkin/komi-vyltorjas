@@ -22,13 +22,13 @@ import java.util.Objects;
 @Component
 public class KomiVyltorjasTelegramBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer {
 
-    @Value("${telegram.bot.token}")
-    private String botToken;
-
+    private final String botToken;
     private final TelegramClient telegramClient;
     private final KomiEuronewsService komiEuronewsService;
 
-    public KomiVyltorjasTelegramBot(@Autowired KomiEuronewsService komiEuronewsService) {
+    public KomiVyltorjasTelegramBot(@Autowired KomiEuronewsService komiEuronewsService,
+                                    @Value("${telegram.bot.token}") String botToken) {
+        this.botToken = botToken;
         telegramClient = new OkHttpTelegramClient(getBotToken());
         this.komiEuronewsService = komiEuronewsService;
     }
@@ -54,7 +54,7 @@ public class KomiVyltorjasTelegramBot implements SpringLongPollingBot, LongPolli
             if (!Objects.equals(messageText, "/euronews")) {
                 messageText = "Command not recognized";
             } else {
-                List<FeedItem> news = komiEuronewsService.getNews();
+                List<FeedItem> news = komiEuronewsService.getNews(5);
 
                 StringBuilder stringBuilder = new StringBuilder();
 
