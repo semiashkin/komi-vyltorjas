@@ -26,9 +26,24 @@ repositories {
 dependencies {
 //	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+//	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+
+
+	implementation("com.fasterxml.jackson.core:jackson-core:2.18.2")
+	implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
 	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.2'
+	implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.2")
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.18.2")
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.2")
 	implementation 'com.rometools:rome:1.18.0'
-	implementation 'org.apache.httpcomponents:httpclient:4.5.2'
+	implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+
+	implementation 'com.openai:openai-java:3.1.2'
+
+	implementation 'org.telegram:telegrambots-springboot-longpolling-starter:8.0.0'
+	implementation 'org.telegram:telegrambots-client:8.0.0'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

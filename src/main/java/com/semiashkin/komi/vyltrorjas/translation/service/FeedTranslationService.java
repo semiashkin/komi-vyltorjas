@@ -45,7 +45,7 @@ public class FeedTranslationService {
                         .domain(appDomain)
                         .src(from.getNeurotolgeCode())
                         .tgt(to.getNeurotolgeCode())
-                        .text(feedItem.getDescription())
+                        .text(feedItem.getText())
                         .build());
 
                 log.info("Translated %s news".formatted(index.incrementAndGet()));
@@ -54,7 +54,8 @@ public class FeedTranslationService {
                     .language(to)
                     .pubDate(feedItem.getPubDate())
                     .title(titleResponse.getResult())
-                    .description(contentResponse.getResult())
+                    .text(contentResponse.getResult())
+                    .links(feedItem.getLinks())
                     .build();
             })
             .toList();
