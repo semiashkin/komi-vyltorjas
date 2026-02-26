@@ -1,7 +1,8 @@
 package com.semiashkin.komi.vyltrorjas.telegram.bot;
 
 import com.semiashkin.komi.vyltrorjas.common.dto.FeedItem;
-import com.semiashkin.komi.vyltrorjas.translation.service.KomiEuronewsService;
+import com.semiashkin.komi.vyltrorjas.translation.service.KomiOpenAiNewsService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,13 +25,13 @@ public class KomiVyltorjasTelegramBot implements SpringLongPollingBot, LongPolli
 
     private final String botToken;
     private final TelegramClient telegramClient;
-    private final KomiEuronewsService komiEuronewsService;
+    private final KomiOpenAiNewsService komiOpenAiNewsService;
 
-    public KomiVyltorjasTelegramBot(@Autowired KomiEuronewsService komiEuronewsService,
+    public KomiVyltorjasTelegramBot(@Autowired KomiOpenAiNewsService komiOpenAiNewsService,
                                     @Value("${telegram.bot.token}") String botToken) {
         this.botToken = botToken;
         telegramClient = new OkHttpTelegramClient(getBotToken());
-        this.komiEuronewsService = komiEuronewsService;
+        this.komiOpenAiNewsService = komiOpenAiNewsService;
     }
 
     @Override
@@ -45,37 +46,56 @@ public class KomiVyltorjasTelegramBot implements SpringLongPollingBot, LongPolli
 
     @Override
     public void consume(Update update) {
-        // We check if the update has a message and the message has text
         if (update.hasMessage() && update.getMessage().hasText()) {
-            // Set variables
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
 
-            if (!Objects.equals(messageText, "/euronews")) {
-                messageText = "Command not recognized";
+            if (!Objects.equals(messageText, "/news")) {
+                sendMessage(chatId, "Command not recognized");
             } else {
-                List<FeedItem> news = komiEuronewsService.getNews(5);
-
-                StringBuilder stringBuilder = new StringBuilder();
-
+                List<FeedItem> news = komiOpenAiNewsService.getNews(15);
                 for (FeedItem feedItem : news) {
-                    stringBuilder.append("**%s**".formatted(feedItem.getTitle())).append("\n")
-                        .append("__%s__".formatted(feedItem.getDescription())).append("\n").append("\n");
+
+
+                    StringBuilder text = getStringBuilder(feedItem);
+
+                    sendMessage(chatId, text.toString());
                 }
+            }
+        }
+    }
 
-                messageText = stringBuilder.toString();
+    @NotNull
+    private static StringBuilder getStringBuilder(FeedItem feedItem) {
+        StringBuilder text = new StringBuilder("*%s*\n\n%s\n".formatted(
+            feedItem.getTitle(),
+            feedItem.getText()
+        ));
+
+        if (feedItem.getLinks() != null && feedItem.getLinks().size() > 0) {
+            text.append("ӧшмӧсъяс:\n%");
+
+            StringBuilder links = new StringBuilder();
+
+            for (int i = 0; i < feedItem.getLinks().size(); i++) {
+                links.append("[№%s](%s) ".formatted(i + 1, feedItem.getLinks().get(i)));
             }
 
-            SendMessage message = SendMessage // Create a message object
-                .builder()
-                .chatId(chatId)
-                .text(messageText)
-                .build();
-            try {
-                telegramClient.execute(message); // Sending our message object to user
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
+            text.append(links);
+        }
+        return text;
+    }
+
+    private void sendMessage(long chatId, String text) {
+        SendMessage message = SendMessage.builder()
+            .chatId(chatId)
+            .parseMode("Markdown")
+            .text(text)
+            .build();
+        try {
+            telegramClient.execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
         }
     }
 

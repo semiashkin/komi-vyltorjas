@@ -13,4 +13,8 @@ rss:
 
 telegram:
   bot:
-    token: 'NOT_A_TOKEN'
+    token: ${TELEGRAM_TOKEN}
+
+openai:
+  api:
+    key: ${OPENAI_API_KEY}
