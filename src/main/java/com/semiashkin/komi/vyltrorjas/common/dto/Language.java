@@ -7,9 +7,9 @@ public enum Language {
 
     ENGLISH("eng"), KOMI("kpv");
 
-    private final String neurotolgeCode;
+    private final String code;
 
-    Language(String neurotolgeCode) {
-        this.neurotolgeCode = neurotolgeCode;
+    Language(String code) {
+        this.code = code;
     }
 }

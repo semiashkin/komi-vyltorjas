@@ -1,6 +1,6 @@
 package com.semiashkin.komi.vyltrorjas.telegram.bot;
 
-import com.semiashkin.komi.vyltrorjas.common.dto.FeedItem;
+import com.semiashkin.komi.vyltrorjas.common.dto.FeedItemDto;
 import com.semiashkin.komi.vyltrorjas.translation.service.KomiOpenAiNewsService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,11 +53,11 @@ public class KomiVyltorjasTelegramBot implements SpringLongPollingBot, LongPolli
             if (!Objects.equals(messageText, "/news")) {
                 sendMessage(chatId, "Command not recognized");
             } else {
-                List<FeedItem> news = komiOpenAiNewsService.getNews(15);
-                for (FeedItem feedItem : news) {
+                List<FeedItemDto> news = komiOpenAiNewsService.getNews(15);
+                for (FeedItemDto feedItemDto : news) {
 
 
-                    StringBuilder text = getStringBuilder(feedItem);
+                    StringBuilder text = getStringBuilder(feedItemDto);
 
                     sendMessage(chatId, text.toString());
                 }
@@ -66,20 +66,21 @@ public class KomiVyltorjasTelegramBot implements SpringLongPollingBot, LongPolli
     }
 
     @NotNull
-    private static StringBuilder getStringBuilder(FeedItem feedItem) {
+    private static StringBuilder getStringBuilder(FeedItemDto feedItemDto) {
         StringBuilder text = new StringBuilder("*%s*\n\n%s\n".formatted(
-            feedItem.getTitle(),
-            feedItem.getText()
+            feedItemDto.getTitle(),
+            feedItemDto.getText()
         ));
 
-        if (feedItem.getLinks() != null && feedItem.getLinks().size() > 0) {
-            text.append("ӧшмӧсъяс:\n%");
+        if (feedItemDto.getLinks() != null && feedItemDto.getLinks().size() > 0) {
+            text.append("\nӧшмӧсъяс:\n\n");
 
             StringBuilder links = new StringBuilder();
 
-            for (int i = 0; i < feedItem.getLinks().size(); i++) {
-                links.append("[№%s](%s) ".formatted(i + 1, feedItem.getLinks().get(i)));
-            }
+            feedItemDto.getLinks()
+                .forEach(link ->
+                    links.append("[%s](%s) ".formatted(link.getSource(), link.getUrl())));
+
 
             text.append(links);
         }
@@ -91,6 +92,7 @@ public class KomiVyltorjasTelegramBot implements SpringLongPollingBot, LongPolli
             .chatId(chatId)
             .parseMode("Markdown")
             .text(text)
+            .disableWebPagePreview(true)
             .build();
         try {
             telegramClient.execute(message);

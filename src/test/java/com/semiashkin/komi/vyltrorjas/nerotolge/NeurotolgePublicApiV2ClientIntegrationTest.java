@@ -19,8 +19,8 @@ public class NeurotolgePublicApiV2ClientIntegrationTest implements AbstractInteg
         NeurotolgeTranslateRequest request = NeurotolgeTranslateRequest.builder()
                 .application("test")
                 .domain("general")
-                .src(Language.ENGLISH.getNeurotolgeCode())
-                .tgt(Language.KOMI.getNeurotolgeCode())
+                .src(Language.ENGLISH.getCode())
+                .tgt(Language.KOMI.getCode())
                 .text("Good!")
                 .build();
 

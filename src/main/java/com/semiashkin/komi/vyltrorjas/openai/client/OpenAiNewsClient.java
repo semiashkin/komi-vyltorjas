@@ -4,14 +4,21 @@ import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.errors.OpenAIException;
 import com.openai.models.responses.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.semiashkin.komi.vyltrorjas.common.dto.FeedItemDto;
+import com.semiashkin.komi.vyltrorjas.common.dto.FeedItemLinkDto;
+import com.semiashkin.komi.vyltrorjas.common.dto.Language;
+import com.semiashkin.komi.vyltrorjas.common.enums.NewsTopic;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +31,7 @@ public class OpenAiNewsClient {
     private String openAiKey;
 
     private OpenAIClient client;
+    private final ObjectMapper objectMapper;
 
     @PostConstruct
     public void init() {
@@ -33,11 +41,11 @@ public class OpenAiNewsClient {
         log.info("OpenAI client initialized");
     }
 
-    public String summarize(String topic) {
+    public List<FeedItemDto> getTheNews(NewsTopic topic) {
         String userInstruction = """
             Summarize today's news into a single JSON object.
             
-            Date: %s (Europe/Tallinn)
+            Date: %s (Europe/Syktyvkar)
             Optional topical focus (may be empty): %s
             
             Strict requirements:
@@ -47,26 +55,25 @@ public class OpenAiNewsClient {
                 "date": "YYYY-MM-DD",
                 "source_count": number,
                 "headline_count": number,
-                "news": [ { "title": string, "text": string, "category": string, "sources": [string], "urls": [string] } ],
-                "meta": { "note": string, "generated_by": "openai", "timezone": "Europe/Tallinn" }
+                "news": [ { "title": string, "datetime": datetime,  "text": string, "topic": string, "links": [ { "source": string, "url": string } ] } ],
               }
             - Deduplicate similar pieces of news across sources.
             - Prefer neutral wording and factual grouping.
             - Should be at least 8-10 news.
             - Text for each piece of the news must be at least 10 sentences.
             - If no news are available, return empty arrays but keep the schema.
-            """.formatted(LocalDate.now(), topic == null ? "" : topic);
+            - Datetime must have a format of like '2007-12-03T10:15:30'. No timezone, only what I provided.
+            - The 'topic' value MUST BE one of these - %s
+            """.formatted(LocalDate.now(), topic == null ? "" : topic, List.of(NewsTopic.values()));
 
         // 3) Call OpenAI with JSON mode enabled
         try {
             ResponseCreateParams params = ResponseCreateParams.builder()
                 .model("gpt-5-nano") // pick your preferred model
                 .addTool(WebSearchTool.builder()
-                    .type(WebSearchTool.Type.WEB_SEARCH_PREVIEW)
+                    .type(WebSearchTool.Type.WEB_SEARCH)
                     .build())
                 .input(userInstruction)
-//                .temperature(0.2)
-//                .maxTokens(100000)
                 .build();
 
             Response response = client.responses()
@@ -88,29 +95,46 @@ public class OpenAiNewsClient {
                 .text();
 
 
-            // Pass through as application/json
-            return json;
+            return parseNews(json);
 
         } catch (OpenAIException ex) {
             throw new RuntimeException(ex);
-//            return """
-//            {
-//              "date":"%s",
-//              "source_count":0,
-//              "headline_count":0,
-//              "highlights":[],
-//              "top_topics":[],
-//              "meta":{"note":"OpenAI call failed: %s","generated_by":"openai","timezone":"Europe/Tallinn"}
-//            }
-//            """.formatted(isoDate, sanitize(ex.getMessage()));
         }
     }
 
-    private static String sanitize(String in) {
-        if (in == null) return "";
-        return in.replace("\"", "'").replace("\n", " ").replace("\r", " ");
-    }
+    private List<FeedItemDto> parseNews(String json) {
+        try {
+            JsonNode root = objectMapper.readTree(json);
+            String date = root.path("date").asText();
 
-    private record Headline(String title, String url, String source, Instant published) {
+            List<FeedItemDto> items = new ArrayList<>();
+            for (JsonNode newsNode : root.path("news")) {
+                JsonNode linksNode = newsNode.path("links");
+
+                List<FeedItemLinkDto> links = new ArrayList<>();
+                if (linksNode.isArray() && !linksNode.isEmpty()) {
+                    linksNode.forEach(urlv -> {
+                        links.add(FeedItemLinkDto.builder()
+                            .source(urlv.path("source").asText())
+                            .url(urlv.path("url").asText())
+                            .build());
+                    });
+                }
+
+                items.add(FeedItemDto.builder()
+                    .title(newsNode.path("title").asText())
+                    .originalTitle(newsNode.path("title").asText())
+                    .text(newsNode.path("text").asText())
+                    .topic(NewsTopic.valueOf(newsNode.path("topic").asText()))
+                    .itemTime(LocalDateTime.parse(newsNode.path("datetime").asText()))
+                    .links(links)
+                    .language(Language.ENGLISH)
+                    .build());
+            }
+
+            return items;
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to parse OpenAI news response", ex);
+        }
     }
 }

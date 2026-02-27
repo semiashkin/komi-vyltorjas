@@ -24,9 +24,8 @@ repositories {
 }
 
 dependencies {
-//	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-//	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 
 
 	implementation("com.fasterxml.jackson.core:jackson-core:2.18.2")
@@ -39,10 +38,14 @@ dependencies {
 	implementation 'com.rometools:rome:1.18.0'
 	implementation 'org.apache.httpcomponents:httpclient:4.5.13'
 
-	implementation 'com.openai:openai-java:3.1.2'
+	implementation 'com.openai:openai-java:4.23.0'
 
 	implementation 'org.telegram:telegrambots-springboot-longpolling-starter:8.0.0'
 	implementation 'org.telegram:telegrambots-client:8.0.0'
+
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+	runtimeOnly 'org.postgresql:postgresql'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

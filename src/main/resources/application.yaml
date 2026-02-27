@@ -4,12 +4,10 @@ spring:
     domain: 'general'
 
 api:
+  majbyr:
+    host: https://api.majbyr.com/
   neurotolge:
     host: https://api.tartunlp.ai/translation/
-
-rss:
-  euronews:
-    uri: https://www.euronews.com/rss
 
 telegram:
   bot:
